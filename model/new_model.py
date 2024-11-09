@@ -9,41 +9,88 @@ data = pd.read_csv(data_path)
 # Define few-shot examples (prompt-template based on provided example)
 few_shot_examples = [
     {
-        "input": "id: 1, dur: 0.121478, proto: tcp, service: -, state: FIN, spkts: 6, dpkts: 4, sbytes: 258, dbytes: 172, rate: 74.087490, ct_dst_sport_ltm: 1, ct_dst_src_ltm: 1, is_ftp_login: 0, ct_ftp_cmd: 0, ct_flw_http_mthd: 0, ct_src_ltm: 1, ct_srv_dst: 1, is_sm_ips_ports: 0, attack_cat: Normal, label: 0",
-        "output": "This log shows a brief TCP connection with a FIN state, indicating normal termination of communication between endpoints. It has a low data transfer rate, typical for non-attack behavior."
+        "input": "dur: 0.121478, proto: tcp, state: FIN, spkts: 6, dpkts: 4, sbytes: 258, dbytes: 172, attack_cat: Normal, label: 0",
+        "output": "This log shows a brief, normal TCP connection with low data transfer, ending in a FIN state, indicating routine communication."
     },
     {
-        "input": "id: 2, dur: 0.649902, proto: tcp, service: -, state: FIN, spkts: 14, dpkts: 38, sbytes: 734, dbytes: 42014, rate: 78.473372, ct_dst_sport_ltm: 1, ct_dst_src_ltm: 2, is_ftp_login: 0, ct_ftp_cmd: 0, ct_flw_http_mthd: 0, ct_src_ltm: 1, ct_srv_dst: 6, is_sm_ips_ports: 0, attack_cat: Normal, label: 0",
-        "output": "This log entry shows a TCP connection with a FIN state and a high volume of data received, possibly indicating a large data transfer. However, the normal status suggests no indication of malicious activity."
+        "input": "dur: 3.210123, proto: tcp, service: ssh, spkts: 20, dpkts: 15, sbytes: 5000, dbytes: 3000, attack_cat: Backdoor, label: 1",
+        "output": "Potential backdoor activity via SSH with notable data exchange, suggesting unauthorized system access."
     },
     {
-        "input": "id: 3, dur: 1.623129, proto: tcp, service: -, state: FIN, spkts: 8, dpkts: 16, sbytes: 364, dbytes: 13186, rate: 14.170161, ct_dst_sport_ltm: 1, ct_dst_src_ltm: 3, is_ftp_login: 0, ct_ftp_cmd: 0, ct_flw_http_mthd: 0, ct_src_ltm: 2, ct_srv_dst: 6, is_sm_ips_ports: 0, attack_cat: Normal, label: 0",
-        "output": "This entry shows a prolonged TCP session with modest data transfer, terminated normally. The low rate and data volume indicate routine communication with no threat detected."
+        "input": "proto: tcp, dur: 1.821563, spkts: 14, dpkts: 14, attack_cat: Analysis, label: 1",
+        "output": "Suspicious network behavior possibly indicative of reconnaissance or probing activity in preparation for an attack."
     },
     {
-        "input": "id: 4, dur: 1.681642, proto: tcp, service: ftp, state: FIN, spkts: 12, dpkts: 12, sbytes: 628, dbytes: 770, rate: 13.677108, ct_dst_sport_ltm: 1, ct_dst_src_ltm: 3, is_ftp_login: 1, ct_ftp_cmd: 1, ct_flw_http_mthd: 0, ct_src_ltm: 2, ct_srv_dst: 1, is_sm_ips_ports: 0, attack_cat: Normal, label: 0",
-        "output": "This log indicates an FTP session, as shown by the ftp service and the is_ftp_login flag set to 1. The session had moderate data transfer and terminated normally, with no abnormal behavior flagged."
+        "input": "dur: 0.254819, proto: udp, state: CON, spkts: 9, dpkts: 9, sbytes: 1000, dbytes: 1200, attack_cat: Fuzzers, label: 1",
+        "output": "Fuzzing activity detected, likely aiming to test for weaknesses by injecting unexpected data."
     },
     {
-        "input": "id: 5, dur: 0.449454, proto: tcp, service: -, state: FIN, spkts: 10, dpkts: 6, sbytes: 534, dbytes: 268, rate: 33.373826, ct_dst_sport_ltm: 1, ct_dst_src_ltm: 40, is_ftp_login: 0, ct_ftp_cmd: 0, ct_flw_http_mthd: 0, ct_src_ltm: 2, ct_srv_dst: 39, is_sm_ips_ports: 0, attack_cat: Normal, label: 0",
-        "output": "This log shows a short TCP session with typical data exchange, ending with a FIN state. Despite high ct_dst_src_ltm, it remains labeled as normal without indications of threat activity."
+        "input": "proto: tcp, dur: 0.501287, spkts: 5, dpkts: 3, sbytes: 700, dbytes: 800, attack_cat: Shellcode, label: 1",
+        "output": "Possible shellcode activity, indicating an attempt to execute arbitrary code within the target system."
+    },
+    {
+        "input": "proto: icmp, dur: 0.647293, spkts: 15, dpkts: 10, attack_cat: Reconnaissance, label: 1",
+        "output": "Reconnaissance attempt through ICMP, potentially scanning for open ports or network vulnerabilities."
+    },
+    {
+        "input": "dur: 0.778914, proto: tcp, service: http, spkts: 7, dpkts: 12, sbytes: 1500, dbytes: 2500, attack_cat: Exploits, label: 1",
+        "output": "Exploitation activity via HTTP, where known vulnerabilities are likely targeted for system access."
+    },
+    {
+        "input": "proto: tcp, dur: 2.123456, sbytes: 50000, dbytes: 48000, attack_cat: DoS, label: 1",
+        "output": "Denial-of-Service (DoS) attempt indicated by high data volume, aimed at overwhelming the target system."
+    },
+    {
+        "input": "proto: tcp, dur: 3.789012, spkts: 15, dpkts: 20, sbytes: 2500, dbytes: 3000, attack_cat: Worms, label: 1",
+        "output": "Potential worm activity, shown by self-replicating behavior typical of network-spreading malware."
+    },
+    {
+        "input": "proto: udp, dur: 1.092384, service: dns, spkts: 4, dpkts: 5, attack_cat: Generic, label: 1",
+        "output": "Generic attack pattern observed, possibly using DNS to probe for general vulnerabilities."
     }
 ]
 
-# Load model and tokenizer (use a lightweight model like `distilgpt2` or LLaMA if you have it)
-model_name = "distilgpt2" # Replace with lightweight LLaMA or similar if available
+relevant_columns = {
+    "Normal": ["dur", "proto", "state", "spkts", "dpkts", "sbytes", "dbytes"],
+    "Backdoor": ["dur", "proto", "service", "spkts", "dpkts", "sbytes", "dbytes"],
+    "Analysis": ["proto", "dur", "spkts", "dpkts"],
+    "Fuzzers": ["dur", "proto", "state", "spkts", "dpkts", "sbytes", "dbytes"],
+    "Shellcode": ["proto", "dur", "spkts", "dpkts", "sbytes", "dbytes"],
+    "Reconnaissance": ["proto", "dur", "spkts", "dpkts"],
+    "Exploits": ["dur", "proto", "service", "spkts", "dpkts", "sbytes", "dbytes"],
+    "DoS": ["proto", "dur", "sbytes", "dbytes"],
+    "Worms": ["proto", "dur", "spkts", "dpkts", "sbytes", "dbytes"],
+    "Generic": ["proto", "dur", "service", "spkts", "dpkts"],
+}
+
+analysis_templates = {
+    "Normal": "This log entry indicates normal, non-suspicious activity with no signs of threats.",
+    "Fuzzers": "This log suggests a potential fuzzing attack, where random data is sent to the system to find vulnerabilities.",
+    "Reconnaissance": "This log shows reconnaissance activity, likely involving scanning or probing to gather system information.",
+    "Shellcode": "This entry indicates possible shellcode execution, which may allow an attacker to take control of the system.",
+    "Analysis": "This log suggests suspicious analysis activity, possibly indicating unauthorized system monitoring.",
+    "Backdoors": "This log entry shows backdoor activity, which may allow remote access to the system without authorization.",
+    "DoS": "This log suggests a Denial of Service (DoS) attack, with high request rates aimed at overwhelming the system.",
+    "Exploits": "This entry indicates exploit activity, suggesting attempts to use vulnerabilities in the system for unauthorized access.",
+    "Generic": "This log shows activity categorized as 'Generic', likely indicating generic malware behavior.",
+    "Worms": "This entry suggests worm activity, which may indicate self-replicating malware attempting to spread across the network."
+}
+
+model_name = "distilgpt2"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name)
-
 tokenizer.pad_token = tokenizer.eos_token
 model.resize_token_embeddings(len(tokenizer))
 
 # Function to format data with few-shot examples
 def format_prompt(log_entry):
     few_shots = "\n".join([
-        f"Input: {ex['input']}\nTarget: {ex['output']}" for ex in few_shot_examples
+        f"Input: {ex['input']}\nOutput: {ex['output']}" for ex in few_shot_examples
     ])
-    return f"{few_shots}\nInput: {log_entry}\nTarget:"
+    return f"{few_shots}\nInput: {log_entry}\nOutput:"
+
+def generate_analysis(row):
+    return analysis_templates.get(row['attack_cat'], "This log entry indicates suspicious activity that does not clearly match known attack patterns.")
 
 # Prepare the dataset for training
 class LogDataset(torch.utils.data.Dataset):
@@ -65,8 +112,14 @@ class LogDataset(torch.utils.data.Dataset):
         return {key: torch.tensor(val) for key, val in encoding.items()}
 
 # Prepare data
-data['log_entry'] = data.apply(lambda row: f"id: {row['id']}, dur: {row['dur']}, proto: {row['proto']}, service: {row['service']}, state: {row['state']}, spkts: {row['spkts']}, dpkts: {row['dpkts']}, sbytes: {row['sbytes']}, dbytes: {row['dbytes']}, rate: {row['rate']}, ct_dst_sport_ltm: {row['ct_dst_sport_ltm']}, ct_dst_src_ltm: {row['ct_dst_src_ltm']}, is_ftp_login: {row['is_ftp_login']}, ct_ftp_cmd: {row['ct_ftp_cmd']}, ct_flw_http_mthd: {row['ct_flw_http_mthd']}, ct_src_ltm: {row['ct_src_ltm']}, ct_srv_dst: {row['ct_srv_dst']}, is_sm_ips_ports: {row['is_sm_ips_ports']}, attack_cat: {row['attack_cat']}, label: {row['label']}", axis=1)
-data['analysis'] = "Normal"  # Placeholder analysis for this script
+data['log_entry'] = data.apply(
+    lambda row: ", ".join(
+        f"{col}: {row[col]}" for col in relevant_columns.get(row['attack_cat'], [])
+    ) + f", attack_cat: {row['attack_cat']}, label: {row['label']}",
+    axis=1
+)
+
+data['analysis'] = data.apply(generate_analysis, axis=1)
 
 # Convert to Dataset
 dataset = LogDataset(data, tokenizer)
@@ -75,12 +128,12 @@ dataset = LogDataset(data, tokenizer)
 training_args = TrainingArguments(
     output_dir="./results",
     eval_strategy="no",
-    learning_rate=2e-5,
+    learning_rate=3e-5,
     weight_decay=0.01,
     per_device_train_batch_size=4,
     num_train_epochs=3,
-    save_steps=10_000,
-    save_total_limit=2,
+    save_steps=500,
+    save_total_limit=1,
     logging_dir='./logs',
 )
 
@@ -103,13 +156,13 @@ print("Few-shot training completed.")
 def test_model(input_log):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
-    prompt = f"Input: {input_log}\nTarget:"
+    prompt = f"Input: {input_log}\nOutput:"
     inputs = tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)
     inputs = {key: val.to(device) for key, val in inputs.items()}
     outputs = model.generate(**inputs, max_length=512, num_return_sequences=1)
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-custom_input = "id: 99, dur: 0.300000, proto: udp, service: DNS, state: INT, spkts: 10, dpkts: 5, sbytes: 1200, dbytes: 300, rate: 10.000, ct_dst_sport_ltm: 2, ct_dst_src_ltm: 2, is_ftp_login: 0, ct_ftp_cmd: 0, ct_flw_http_mthd: 0, ct_src_ltm: 2, ct_srv_dst: 2, is_sm_ips_ports: 1, attack_cat: Attempted Admin, label: 1"
+custom_input = "proto: udp, dur: 1.092384, service: dns, spkts: 4, dpkts: 5, attack_cat: Generic, label: 1"
 
 # Run the test
 output = test_model(custom_input)
