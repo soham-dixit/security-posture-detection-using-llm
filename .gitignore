@@ -1,3 +1,4 @@
 model/results_gpt2
 model/security_posture_gpt2
 model/*.csv
+model/security_posture_llm
