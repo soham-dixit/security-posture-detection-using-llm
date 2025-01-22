@@ -66,6 +66,7 @@ def format_test_prompt(log_entry, few_shot_examples):
 @app.route('/api/threats', methods=['POST'])
 def analyze_log():
     data = request.json
+    print(data)
     if 'log_entry' not in data:
         return jsonify({'error': 'Missing log_entry in request data'}), 400
 
