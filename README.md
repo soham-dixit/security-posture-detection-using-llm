@@ -125,8 +125,6 @@ The training pipeline lives under `model/`:
    python test_model.py
    ```
 
-> ⚠️ Before running training scripts, set your Hugging Face token via the `HUGGINGFACE_TOKEN` environment variable (or `huggingface-cli login`) rather than hardcoding it in source.
-
 ## Results
 
 **Few-shot vs. zero-shot accuracy by attack category:**
