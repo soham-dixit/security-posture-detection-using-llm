@@ -125,7 +125,7 @@ The training pipeline lives under `model/`:
    python test_model.py
    ```
 
-> ⚠️ Before running training scripts, set your Hugging Face token via the `HUGGINGFACE_TOKEN` environment variable (or `huggingface-cli login`) rather than hardcoding it in source — see [Security note](#security-note).
+> ⚠️ Before running training scripts, set your Hugging Face token via the `HUGGINGFACE_TOKEN` environment variable (or `huggingface-cli login`) rather than hardcoding it in source.
 
 ## Results
 
@@ -139,17 +139,6 @@ The training pipeline lives under `model/`:
 ![Performance metrics continued](./performance_metrics_part2.png)
 
 Full evaluation methodology and discussion are in [Paper.pdf](./Paper.pdf).
-
-## Security note
-
-`model/latest_model.py` currently contains a Hugging Face access token hardcoded via `login(token="...")`. Treat this token as compromised, revoke/rotate it from your [Hugging Face settings](https://huggingface.co/settings/tokens), and load it from an environment variable instead:
-
-```python
-from huggingface_hub import login
-import os
-
-login(token=os.environ["HUGGINGFACE_TOKEN"])
-```
 
 ## License
 
